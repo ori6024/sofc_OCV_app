@@ -11,12 +11,13 @@ st.markdown("""
     <style>
     .block-container { padding-top: 1rem; padding-bottom: 0rem; }
     .stSlider { margin-bottom: -1.0rem; }
-    h3 { font-size: 1.2rem !important; margin-bottom: 0rem; margin-top: 0rem; }
+    h2 { font-size: 1.5rem !important; margin-bottom: 0.5rem; margin-top: 0rem; color: #333; }
     div[data-testid="stMarkdownContainer"] > p { font-size: 0.8rem; margin-bottom: 0.1rem; }
     </style>
     """, unsafe_allow_html=True)
 
-st.write("### ⚙️ 条件変更")
+# タイトルを表示
+st.write("## SOFC OCV 解析シミュレーター")
 
 # スライダーを3列に配置
 col1, col2, col3 = st.columns(3)
@@ -54,15 +55,23 @@ fig.update_layout(
     height=400,
     plot_bgcolor='white',
     legend=dict(x=0.02, y=0.02, bgcolor='rgba(255,255,255,0.7)'),
+    # 横軸の設定（縦目盛線を追加）
     xaxis=dict(
         title="水素/水蒸気比率 [%]", 
         range=[0, 100], dtick=10, 
-        fixedrange=True, gridcolor='lightgray', linecolor='black', mirror=True
+        fixedrange=True, 
+        gridcolor='lightgray', # 縦目盛線の色
+        showgrid=True,         # 縦目盛線を表示
+        linecolor='black', mirror=True
     ),
+    # 縦軸の設定
     yaxis=dict(
         title="OCV [V]", 
         range=[0.6, 1.3], dtick=0.05, 
-        fixedrange=True, gridcolor='lightgray', linecolor='black', mirror=True
+        fixedrange=True, 
+        gridcolor='lightgray', # 横目盛線の色
+        showgrid=True,         # 横目盛線を表示
+        linecolor='black', mirror=True
     ),
     margin=dict(l=50, r=10, t=10, b=40)
 )
@@ -72,7 +81,6 @@ st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 # 最下部
 st.write(f"**E0:** {E0:.4f}V | **温度:** {T_c}℃")
 
-# エラー箇所を修正したデータフレーム作成とダウンロードボタン
 df = pd.DataFrame({"H2_H2O_ratio": h_list, "OCV_V": y_user})
 st.download_button(
     label="CSV保存",
