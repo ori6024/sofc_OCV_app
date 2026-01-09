@@ -6,30 +6,30 @@ import pandas as pd
 # 1. ページレイアウト設定（centeredモード）
 st.set_page_config(page_title="SOFC Analyzer", layout="centered")
 
-# CSSによる超省スペース化設定
+# 余白と重なりを解消するための再調整CSS
 st.markdown("""
     <style>
-    /* ページ全体の余白を最小化 */
-    .block-container { padding-top: 2rem; padding-bottom: 0rem; max-width: 700px; }
+    /* ページ上部の余白を広げて見切れを防止 */
+    .block-container { padding-top: 3.5rem; padding-bottom: 0rem; max-width: 700px; }
     
-    /* スライダーの間隔を極限まで詰める */
-    .stSlider { margin-top: -1.5rem; margin-bottom: -1.5rem; }
+    /* スライダーの上下重なりを解消 */
+    .stSlider { margin-top: -0.5rem; margin-bottom: 0rem; }
     
-    /* タイトルとヘッダーのサイズと余白を最小化 */
-    h2 { font-size: 1.2rem !important; margin-bottom: 0.5rem; margin-top: 0rem; color: #000; text-align: center; }
+    /* タイトルの視認性を確保 */
+    h2 { font-size: 1.3rem !important; margin-bottom: 0.8rem; margin-top: 0rem; color: #000; text-align: center; line-height: 1.4; }
     
-    /* スライダーのラベル文字を小さく */
-    div[data-testid="stMarkdownContainer"] > p { font-size: 0.75rem !important; margin-bottom: 0rem; color: #000; font-weight: bold; }
+    /* スライダーのラベル文字サイズ調整 */
+    div[data-testid="stMarkdownContainer"] > p { font-size: 0.8rem !important; margin-bottom: -0.5rem; color: #000; font-weight: bold; }
     
-    /* ウィジェット全体の上下間隔を調整 */
-    [data-testid="stVerticalBlock"] { gap: 0.2rem !important; }
+    /* ブロック間の間隔を適切に確保 */
+    [data-testid="stVerticalBlock"] { gap: 0.5rem !important; }
     </style>
     """, unsafe_allow_html=True)
 
 # タイトル
 st.write("## SOFC OCV 解析シミュレーター")
 
-# スライダーを3列に配置（スマホでは自動的に縦に並びますが、隙間は最小です）
+# スライダーを3列に配置
 col1, col2, col3 = st.columns(3)
 with col1:
     T_c = st.slider("温度 (°C)", 400, 1100, 800)
@@ -62,7 +62,7 @@ fig.add_trace(go.Scatter(x=h_list, y=y_5, name='5atm', line=dict(color='black', 
 fig.add_trace(go.Scatter(x=h_list, y=y_user, name='現在', line=dict(color='red', width=4)))
 
 fig.update_layout(
-    height=380, # 1画面に収めるために高さを少し圧縮
+    height=400, # 視認性を損なわない程度に高さを維持
     plot_bgcolor='white',
     legend=dict(x=0.02, y=0.02, bgcolor='rgba(255,255,255,0.7)', bordercolor="black", borderwidth=1, font=dict(size=10)),
     
@@ -76,7 +76,7 @@ fig.update_layout(
         linecolor='black', linewidth=2, mirror=True
     ),
     yaxis=dict(
-        title=dict(text="OCV [V]", font=dict(color='black', size=12)),
+        title=dict(text="開回路電圧 OCV [V]", font=dict(color='black', size=12)),
         range=[0.6, 1.3], dtick=0.1,
         tickfont=dict(color='black', size=10),
         ticks="outside", tickcolor="black",
@@ -89,7 +89,7 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-# 最下部情報のコンパクト化
+# 下部情報の整理
 st.write(f"E0: {E0:.4f}V | 温度: {T_c}℃")
 df = pd.DataFrame({"H2_H2O_ratio": h_list, "OCV_V": y_user})
 st.download_button("CSV保存", df.to_csv(index=False).encode('utf-8'), f"sofc_{T_c}C.csv")
