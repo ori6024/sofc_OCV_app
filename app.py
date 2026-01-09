@@ -6,7 +6,7 @@ import pandas as pd
 # 1. ページレイアウト設定
 st.set_page_config(page_title="SOFC Analyzer", layout="wide")
 
-# 余白とサイズを極限までカットするCSS
+# 余白とサイズをカットするCSS
 st.markdown("""
     <style>
     .block-container { padding-top: 1rem; padding-bottom: 0rem; }
@@ -54,24 +54,15 @@ fig.update_layout(
     height=400,
     plot_bgcolor='white',
     legend=dict(x=0.02, y=0.02, bgcolor='rgba(255,255,255,0.7)'),
-    # 【修正点】ラベル名の変更と、目盛りを10%刻み(dtick=10)に設定
     xaxis=dict(
         title="水素/水蒸気比率 [%]", 
-        range=[0, 100], 
-        dtick=10, 
-        fixedrange=True, 
-        gridcolor='lightgray',
-        linecolor='black',
-        mirror=True
+        range=[0, 100], dtick=10, 
+        fixedrange=True, gridcolor='lightgray', linecolor='black', mirror=True
     ),
     yaxis=dict(
         title="OCV [V]", 
-        range=[0.6, 1.3], 
-        dtick=0.05, 
-        fixedrange=True, 
-        gridcolor='lightgray',
-        linecolor='black',
-        mirror=True
+        range=[0.6, 1.3], dtick=0.05, 
+        fixedrange=True, gridcolor='lightgray', linecolor='black', mirror=True
     ),
     margin=dict(l=50, r=10, t=10, b=40)
 )
@@ -80,4 +71,12 @@ st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 # 最下部
 st.write(f"**E0:** {E0:.4f}V | **温度:** {T_c}℃")
-df = pd.DataFrame({"水素/水蒸気比率[%]": h_
+
+# エラー箇所を修正したデータフレーム作成とダウンロードボタン
+df = pd.DataFrame({"H2_H2O_ratio": h_list, "OCV_V": y_user})
+st.download_button(
+    label="CSV保存",
+    data=df.to_csv(index=False).encode('utf-8'),
+    file_name=f"sofc_{T_c}C.csv",
+    mime="text/csv"
+)
