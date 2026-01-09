@@ -6,13 +6,19 @@ import pandas as pd
 # 1. ページのレイアウト設定
 st.set_page_config(page_title="SOFC Analyzer", layout="wide")
 
+# 余白を詰めるためのカスタムCSS
+st.markdown("""
+    <style>
+    .block-container { padding-top: 1rem; padding-bottom: 0rem; }
+    .stSlider { margin-bottom: -1.5rem; }
+    h1 { font-size: 1.5rem !important; margin-bottom: 0.5rem; }
+    div[data-testid="stMarkdownContainer"] > p { margin-bottom: 0rem; }
+    </style>
+    """, unsafe_allow_stdio=True)
+
 st.title("SOFC OCV 解析シミュレーター")
 
 # --- メイン画面上部に「条件変更」スライダーを配置 ---
-st.markdown("### ⚙️ 条件変更")
-st.write("スライダーを動かすと、下のグラフがリアルタイムに変化します。")
-
-# 列を分けてスライダーを横に並べる（PCで見やすくなり、スマホでは縦に並びます）
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -23,8 +29,6 @@ with col2:
 
 with col3:
     P_air_user = st.slider("空気極 全圧 (atm)", 0.5, 10.0, 1.0, 0.5)
-
-st.write("---") # 区切り線
 
 # --- 定数計算 ---
 T_k = T_c + 273.15
@@ -55,30 +59,28 @@ fig.add_trace(go.Scatter(x=h_list, y=y_5, name='5atm平衡', line=dict(color='bl
 fig.add_trace(go.Scatter(x=h_list, y=y_user, name='現在の設定', line=dict(color='red', width=4)))
 
 fig.update_layout(
-    height=600,
+    height=450, # グラフの高さを少し低くして1画面に収まりやすく
     plot_bgcolor='white',
     legend=dict(x=0.02, y=0.02, bgcolor='rgba(255,255,255,0.8)', bordercolor="black", borderwidth=1),
     xaxis=dict(
-        title="水素容量比率 [%]",
-        dtick=10, range=[0, 100],
+        title="水素容量比率 [%]", dtick=10, range=[0, 100],
         showgrid=True, gridcolor='DarkGray', showline=True, linewidth=2, linecolor='black', mirror=True,
         fixedrange=True
     ),
     yaxis=dict(
-        title="開回路電圧 OCV [V]",
-        dtick=0.05, # 0.05V刻み
-        range=[0.6, 1.3],
+        title="開回路電圧 OCV [V]", dtick=0.05, range=[0.6, 1.3],
         showgrid=True, gridcolor='DarkGray', showline=True, linewidth=2, linecolor='black', mirror=True,
-        autorange=False,
-        fixedrange=True
+        autorange=False, fixedrange=True
     ),
-    margin=dict(l=60, r=20, t=20, b=60)
+    margin=dict(l=50, r=10, t=10, b=50) # グラフ周囲の余白もカット
 )
 
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-# --- 下部に情報表示 ---
-st.info(f"**標準電極電位 E0:** {E0:.4f} V （温度 {T_c}℃）")
-
-df = pd.DataFrame({"H2_ratio_%": h_list, "OCV_V": y_user})
-st.download_button("計算データをCSV保存", df.to_csv(index=False).encode('utf-8'), f"sofc_data_{T_c}C.csv")
+# --- 下部メニューをコンパクトに ---
+col_info, col_btn = st.columns([2, 1])
+with col_info:
+    st.write(f"E0: {E0:.4f} V ({T_c}℃)")
+with col_btn:
+    df = pd.DataFrame({"H2_ratio_%": h_list, "OCV_V": y_user})
+    st.download_button("CSV保存", df.to_csv(index=False).encode('utf-8'), f"sofc_{T_c}C.csv")
