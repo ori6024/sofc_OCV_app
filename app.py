@@ -3,12 +3,15 @@ import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
 
-# 1. ページのレイアウト設定
+# 1. ページのレイアウト設定（ワイドモード）
 st.set_page_config(page_title="SOFC Analyzer", layout="wide")
-st.title("SOFC OCV 解析シミュレーター")
 
-# 2. --- サイドバーの設定（条件変更ラベル追加） ---
-st.sidebar.markdown("### ⚙️ 条件変更")
+# 2. --- サイドバーの設定 ---
+# サイドバーを開いたときに一番上に目立つように表示
+st.sidebar.markdown("# ⚙️ 条件変更") 
+st.sidebar.write("こちらでパラメータを調整できます")
+st.sidebar.write("---")
+
 st.sidebar.header("共通条件")
 T_c = st.sidebar.slider("温度 (°C)", 400, 1100, 800)
 
@@ -19,14 +22,13 @@ P_air_user = st.sidebar.slider("空気極 全圧 (atm)", 0.5, 10.0, 1.0, 0.5)
 # --- 定数計算 ---
 T_k = T_c + 273.15
 R, F = 8.314, 96485
-# 標準電極電位 E0 の計算（温度依存）
+# 標準電極電位 E0 の計算
 E0 = 1.2844 - 0.0002521 * T_k 
 O2_ratio = 0.21
 
 # --- 計算用関数 ---
 def get_ocv(h2_ratio, p_f, p_a):
-    # 0除算および対数エラー回避（0.01%〜99.99%にクリップ）
-    x = max(min(h2_ratio / 100.0, 0.9999), 0.0001) 
+    x = max(min(h2_ratio / 100.0, 0.9999), 0.0001) # 0除算回避
     p_h2 = x * p_f
     p_h2o = (1 - x) * p_f
     p_o2 = O2_ratio * p_a
@@ -41,10 +43,13 @@ y_1 = [get_ocv(h, 1.0, 1.0) for h in h_list]
 y_3 = [get_ocv(h, 3.0, 3.0) for h in h_list]
 y_5 = [get_ocv(h, 5.0, 5.0) for h in h_list]
 
+# --- メイン画面表示 ---
+st.title("SOFC OCV 解析シミュレーター")
+
 # --- グラフ描画 ---
 fig = go.Figure()
 
-# 比較用ライン（1, 3, 5 atm）
+# 比較用ライン
 fig.add_trace(go.Scatter(x=h_list, y=y_1, name='1atm平衡', line=dict(color='lightgray', dash='dot')))
 fig.add_trace(go.Scatter(x=h_list, y=y_3, name='3atm平衡', line=dict(color='gray', dash='dash')))
 fig.add_trace(go.Scatter(x=h_list, y=y_5, name='5atm平衡', line=dict(color='black', dash='dash')))
@@ -52,7 +57,6 @@ fig.add_trace(go.Scatter(x=h_list, y=y_5, name='5atm平衡', line=dict(color='bl
 # メインライン（赤太線）
 fig.add_trace(go.Scatter(x=h_list, y=y_user, name='現在の設定', line=dict(color='red', width=4)))
 
-# レイアウト設定（スマホ・ズーム固定対応）
 fig.update_layout(
     height=600,
     plot_bgcolor='white',
@@ -68,36 +72,31 @@ fig.update_layout(
         tickfont=dict(color='black'),
         showgrid=True, gridcolor='DarkGray', gridwidth=1,
         showline=True, linewidth=2, linecolor='black', mirror=True,
-        fixedrange=True  # スマホでのズームを禁止
+        fixedrange=True # スマホでズレないように固定
     ),
     
-    # 縦軸の設定（0.6V〜1.3Vで完全固定）
+    # 縦軸の設定
     yaxis=dict(
         title=dict(text="開回路電圧 OCV [V]", font=dict(color='black', size=14)),
         tickmode='linear',
         tick0=0.6,
-        dtick=0.1,
-        range=[0.6, 1.3],
+        dtick=0.05,        # 【ご要望】0.05V刻みに変更
+        range=[0.6, 1.3],  # 最小0.6V, 最大1.3Vに固定
         tickfont=dict(color='black'),
         showgrid=True, gridcolor='DarkGray', gridwidth=1,
         showline=True, linewidth=2, linecolor='black', mirror=True,
         autorange=False,
-        fixedrange=True  # スマホでのズームを禁止
+        fixedrange=True    # スマホでズレないように固定
     ),
     margin=dict(l=60, r=20, t=40, b=60)
 )
 
-# グラフを表示（ツールバー非表示設定）
+# グラフ表示（ズーム禁止設定）
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 # --- 情報表示 ---
-st.info(f"**標準電極電位 E0:** {E0:.4f} V  \n（温度 {T_c}℃ における基礎電圧。ここからガス分圧の影響でOCVが上下します）")
+st.info(f"**標準電極電位 E0:** {E0:.4f} V  \n（温度 {T_c}℃ における基礎電圧）")
 
 # ダウンロード機能
 df = pd.DataFrame({"H2_ratio_%": h_list, "OCV_V": y_user})
-st.download_button(
-    label="計算データをCSVで保存",
-    data=df.to_csv(index=False).encode('utf-8'),
-    file_name=f"sofc_ocv_{T_c}C.csv",
-    mime="text/csv"
-)
+st.download_button("計算データをCSV保存", df.to_csv(index=False).encode('utf-8'), f"sofc_data_{T_c}C.csv")
