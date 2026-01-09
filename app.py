@@ -6,17 +6,17 @@ import pandas as pd
 # 1. ページレイアウト設定
 st.set_page_config(page_title="SOFC Analyzer", layout="wide")
 
-# 【修正】タイトルの見切れを防ぐために padding-top を 3rem に増やしました
+# タイトルの見切れ防止と余白カット
 st.markdown("""
     <style>
-    .block-container { padding-top: 3rem; padding-bottom: 0rem; }
+    .block-container { padding-top: 3.5rem; padding-bottom: 0rem; }
     .stSlider { margin-bottom: -1.0rem; }
     h2 { font-size: 1.5rem !important; margin-bottom: 1.0rem; margin-top: 0rem; color: #333; line-height: 1.2; }
     div[data-testid="stMarkdownContainer"] > p { font-size: 0.8rem; margin-bottom: 0.1rem; }
     </style>
     """, unsafe_allow_html=True)
 
-# タイトルを表示（## は st.write 内で <h2> タグとして処理されます）
+# タイトル
 st.write("## SOFC OCV 解析シミュレーター")
 
 # スライダーを3列に配置
@@ -55,17 +55,25 @@ fig.update_layout(
     height=400,
     plot_bgcolor='white',
     legend=dict(x=0.02, y=0.02, bgcolor='rgba(255,255,255,0.7)'),
+    
+    # 横軸の設定
     xaxis=dict(
         title="水素/水蒸気比率 [%]", 
-        range=[0, 100], dtick=10, 
+        range=[0, 100], 
+        dtick=10,                # 主目盛 (10%)
+        minor=dict(dtick=5, showgrid=True, gridcolor='whitesmoke'), # 補助目盛 (5%)
         fixedrange=True, 
         gridcolor='lightgray',
         showgrid=True,
         linecolor='black', mirror=True
     ),
+    
+    # 縦軸の設定
     yaxis=dict(
-        title="開回路電圧 OCV [V]", 
-        range=[0.6, 1.3], dtick=0.05, 
+        title="OCV [V]", 
+        range=[0.6, 1.3], 
+        dtick=0.1,               # 主目盛 (0.1V)
+        minor=dict(dtick=0.05, showgrid=True, gridcolor='whitesmoke'), # 補助目盛 (0.05V)
         fixedrange=True, 
         gridcolor='lightgray',
         showgrid=True,
