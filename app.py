@@ -3,10 +3,10 @@ import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
 
-# 1. ページレイアウト設定
-st.set_page_config(page_title="SOFC Analyzer", layout="wide")
+# 1. ページレイアウト設定（wideからcenteredに変更）
+st.set_page_config(page_title="SOFC Analyzer", layout="centered")
 
-# タイトルの見切れ防止と余白カット
+# CSSによるスタイル調整（タイトルの見切れ防止とテキスト色の統一）
 st.markdown("""
     <style>
     .block-container { padding-top: 3.5rem; padding-bottom: 0rem; }
@@ -58,22 +58,23 @@ fig.update_layout(
     plot_bgcolor='white',
     legend=dict(x=0.02, y=0.02, bgcolor='rgba(255,255,255,0.7)', bordercolor="black", borderwidth=1),
     
-    # 横軸の設定
+    # 横軸の設定（真っ黒に強調）
     xaxis=dict(
         title=dict(text="水素/水蒸気比率 [%]", font=dict(color='black', size=14)),
         range=[0, 100], 
         dtick=10,
         tickfont=dict(color='black', size=12),
-        ticks="outside", # 目盛線を外側に
+        ticks="outside",
         tickcolor="black",
-        minor=dict(dtick=5, showgrid=True, gridcolor='silver'), # 補助目盛を少し濃く
+        minor=dict(dtick=5, showgrid=True, gridcolor='silver'), # 補助目盛を濃いめの銀色に
         fixedrange=True, 
-        gridcolor='gray', # 主目盛線を少し濃く
+        gridcolor='black', # 主目盛線を黒く
+        gridwidth=0.5,
         showgrid=True,
-        linecolor='black', linewidth=2, mirror=True # 枠線を真っ黒で太く
+        linecolor='black', linewidth=2, mirror=True # 枠線を太く真っ黒に
     ),
     
-    # 縦軸の設定
+    # 縦軸の設定（真っ黒に強調）
     yaxis=dict(
         title=dict(text="開回路電圧 OCV [V]", font=dict(color='black', size=14)),
         range=[0.6, 1.3], 
@@ -81,9 +82,10 @@ fig.update_layout(
         tickfont=dict(color='black', size=12),
         ticks="outside",
         tickcolor="black",
-        minor=dict(dtick=0.05, showgrid=True, gridcolor='silver'), # 補助目盛を少し濃く
+        minor=dict(dtick=0.05, showgrid=True, gridcolor='silver'), 
         fixedrange=True, 
-        gridcolor='gray',
+        gridcolor='black',
+        gridwidth=0.5,
         showgrid=True,
         linecolor='black', linewidth=2, mirror=True
     ),
