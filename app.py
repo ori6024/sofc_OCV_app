@@ -11,8 +11,8 @@ st.markdown("""
     <style>
     .block-container { padding-top: 3.5rem; padding-bottom: 0rem; }
     .stSlider { margin-bottom: -1.0rem; }
-    h2 { font-size: 1.5rem !important; margin-bottom: 1.0rem; margin-top: 0rem; color: #333; line-height: 1.2; }
-    div[data-testid="stMarkdownContainer"] > p { font-size: 0.8rem; margin-bottom: 0.1rem; }
+    h2 { font-size: 1.5rem !important; margin-bottom: 1.0rem; margin-top: 0rem; color: #000; line-height: 1.2; }
+    div[data-testid="stMarkdownContainer"] > p { font-size: 0.8rem; margin-bottom: 0.1rem; color: #000; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -47,39 +47,47 @@ y_5 = [get_ocv(h, 5.0, 5.0) for h in h_list]
 
 # --- グラフ描画 ---
 fig = go.Figure()
-fig.add_trace(go.Scatter(x=h_list, y=y_1, name='1atm', line=dict(color='lightgray', dash='dot')))
-fig.add_trace(go.Scatter(x=h_list, y=y_5, name='5atm', line=dict(color='black', dash='dash')))
+fig.add_trace(go.Scatter(x=h_list, y=y_1, name='1atm', line=dict(color='gray', width=1, dash='dot')))
+fig.add_trace(go.Scatter(x=h_list, y=y_5, name='5atm', line=dict(color='black', width=1.5, dash='dash')))
 fig.add_trace(go.Scatter(x=h_list, y=y_user, name='現在', line=dict(color='red', width=4)))
 
+# 
+
 fig.update_layout(
-    height=400,
+    height=450,
     plot_bgcolor='white',
-    legend=dict(x=0.02, y=0.02, bgcolor='rgba(255,255,255,0.7)'),
+    legend=dict(x=0.02, y=0.02, bgcolor='rgba(255,255,255,0.7)', bordercolor="black", borderwidth=1),
     
     # 横軸の設定
     xaxis=dict(
-        title="水素/水蒸気比率 [%]", 
+        title=dict(text="水素/水蒸気比率 [%]", font=dict(color='black', size=14)),
         range=[0, 100], 
-        dtick=10,                # 主目盛 (10%)
-        minor=dict(dtick=5, showgrid=True, gridcolor='whitesmoke'), # 補助目盛 (5%)
+        dtick=10,
+        tickfont=dict(color='black', size=12),
+        ticks="outside", # 目盛線を外側に
+        tickcolor="black",
+        minor=dict(dtick=5, showgrid=True, gridcolor='silver'), # 補助目盛を少し濃く
         fixedrange=True, 
-        gridcolor='lightgray',
+        gridcolor='gray', # 主目盛線を少し濃く
         showgrid=True,
-        linecolor='black', mirror=True
+        linecolor='black', linewidth=2, mirror=True # 枠線を真っ黒で太く
     ),
     
     # 縦軸の設定
     yaxis=dict(
-        title="OCV [V]", 
+        title=dict(text="開回路電圧 OCV [V]", font=dict(color='black', size=14)),
         range=[0.6, 1.3], 
-        dtick=0.1,               # 主目盛 (0.1V)
-        minor=dict(dtick=0.05, showgrid=True, gridcolor='whitesmoke'), # 補助目盛 (0.05V)
+        dtick=0.1,
+        tickfont=dict(color='black', size=12),
+        ticks="outside",
+        tickcolor="black",
+        minor=dict(dtick=0.05, showgrid=True, gridcolor='silver'), # 補助目盛を少し濃く
         fixedrange=True, 
-        gridcolor='lightgray',
+        gridcolor='gray',
         showgrid=True,
-        linecolor='black', mirror=True
+        linecolor='black', linewidth=2, mirror=True
     ),
-    margin=dict(l=50, r=10, t=10, b=40)
+    margin=dict(l=60, r=20, t=10, b=50)
 )
 
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
