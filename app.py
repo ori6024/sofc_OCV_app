@@ -3,26 +3,26 @@ import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
 
-# 1. ページレイアウト設定（centeredモード）
+# 1. ページレイアウト設定
 st.set_page_config(page_title="SOFC Analyzer", layout="centered")
 
-# 余白と重なりを解消するための再調整CSS
+# 重なりと見切れを完全に解消するためのCSS
 st.markdown("""
     <style>
-    /* ページ上部の余白を広げて見切れを防止 */
-    .block-container { padding-top: 3.5rem; padding-bottom: 0rem; max-width: 700px; }
+    /* ページ上部の余白を確保しタイトルの見切れを防止 */
+    .block-container { padding-top: 4rem; padding-bottom: 2rem; max-width: 750px; }
     
-    /* スライダーの上下重なりを解消 */
-    .stSlider { margin-top: -0.5rem; margin-bottom: 0rem; }
+    /* タイトルのスタイル：真っ黒で視認性向上 */
+    h2 { font-size: 1.5rem !important; margin-bottom: 1.5rem; margin-top: 0rem; color: #000; text-align: center; line-height: 1.2; }
     
-    /* タイトルの視認性を確保 */
-    h2 { font-size: 1.3rem !important; margin-bottom: 0.8rem; margin-top: 0rem; color: #000; text-align: center; line-height: 1.4; }
+    /* スライダー：適度な間隔を空けて重なりを防止 */
+    .stSlider { margin-top: 0.5rem; margin-bottom: 1.0rem; }
     
-    /* スライダーのラベル文字サイズ調整 */
-    div[data-testid="stMarkdownContainer"] > p { font-size: 0.8rem !important; margin-bottom: -0.5rem; color: #000; font-weight: bold; }
+    /* ラベル文字：読みやすく真っ黒に */
+    div[data-testid="stMarkdownContainer"] > p { font-size: 0.9rem !important; margin-bottom: 0rem; color: #000; font-weight: bold; }
     
-    /* ブロック間の間隔を適切に確保 */
-    [data-testid="stVerticalBlock"] { gap: 0.5rem !important; }
+    /* 下部情報の重なりを防止するためのマージン */
+    .info-text { margin-top: 1rem; margin-bottom: 1rem; font-weight: bold; color: #000; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -62,34 +62,37 @@ fig.add_trace(go.Scatter(x=h_list, y=y_5, name='5atm', line=dict(color='black', 
 fig.add_trace(go.Scatter(x=h_list, y=y_user, name='現在', line=dict(color='red', width=4)))
 
 fig.update_layout(
-    height=400, # 視認性を損なわない程度に高さを維持
+    height=420,
     plot_bgcolor='white',
     legend=dict(x=0.02, y=0.02, bgcolor='rgba(255,255,255,0.7)', bordercolor="black", borderwidth=1, font=dict(size=10)),
-    
     xaxis=dict(
-        title=dict(text="水素/水蒸気比率 [%]", font=dict(color='black', size=12)),
-        range=[0, 100], dtick=10,
-        tickfont=dict(color='black', size=10),
+        title=dict(text="水素/水蒸気比率 [%]", font=dict(color='black', size=13)),
+        range=[0, 100], dtick=10, tickfont=dict(color='black', size=11),
         ticks="outside", tickcolor="black",
         minor=dict(dtick=5, showgrid=True, gridcolor='silver'),
         fixedrange=True, gridcolor='black', gridwidth=0.5, showgrid=True,
         linecolor='black', linewidth=2, mirror=True
     ),
     yaxis=dict(
-        title=dict(text="開回路電圧 OCV [V]", font=dict(color='black', size=12)),
-        range=[0.6, 1.3], dtick=0.1,
-        tickfont=dict(color='black', size=10),
+        title=dict(text="開回路電圧 OCV [V]", font=dict(color='black', size=13)),
+        range=[0.6, 1.3], dtick=0.1, tickfont=dict(color='black', size=11),
         ticks="outside", tickcolor="black",
         minor=dict(dtick=0.05, showgrid=True, gridcolor='silver'), 
         fixedrange=True, gridcolor='black', gridwidth=0.5, showgrid=True,
         linecolor='black', linewidth=2, mirror=True
     ),
-    margin=dict(l=50, r=10, t=10, b=40)
+    margin=dict(l=60, r=20, t=10, b=50)
 )
 
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-# 下部情報の整理
-st.write(f"E0: {E0:.4f}V | 温度: {T_c}℃")
+# --- 下部情報表示（重なりを解消したレイアウト） ---
+st.markdown(f'<div class="info-text">E0: {E0:.4f}V ｜ 温度: {T_c}℃</div>', unsafe_allow_html=True)
+
 df = pd.DataFrame({"H2_H2O_ratio": h_list, "OCV_V": y_user})
-st.download_button("CSV保存", df.to_csv(index=False).encode('utf-8'), f"sofc_{T_c}C.csv")
+st.download_button(
+    label="CSV保存",
+    data=df.to_csv(index=False).encode('utf-8'),
+    file_name=f"sofc_{T_c}C.csv",
+    mime="text/csv"
+)
